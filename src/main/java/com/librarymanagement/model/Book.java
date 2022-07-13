@@ -1,26 +1,42 @@
 package com.librarymanagement.model;
 
-import java.util.Objects;
-import java.util.ArrayList;
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
 
 @Entity
 public class Book {
     @Id
     private int id;
     private String title;
-    private ArrayList<Author> author;
     private String serialNumber;
     private int yearOfPublieshed;
     private float price;
+    @ManyToMany(
+            fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            }
+    )
+    @JoinTable(name = "author_book",
+            joinColumns = @JoinColumn(name = "book_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "author_id", referencedColumnName = "id")
+    )
+    private Set<Author> authors = new HashSet<>();
 
-    public Book(int id, String title, ArrayList<Author> author, String serialNumber, int yearOfPublieshed, float price) {
+    public Book() {
+    }
+
+    public Book(int id, String title, String serialNumber, int yearOfPublieshed, float price, Set<Author> authors) {
         this.id = id;
         this.title = title;
-        this.author = author;
         this.serialNumber = serialNumber;
         this.yearOfPublieshed = yearOfPublieshed;
         this.price = price;
+        this.authors = authors;
     }
 
     public int getId() {
@@ -31,8 +47,8 @@ public class Book {
         return title;
     }
 
-    public ArrayList<Author> getAuthor() {
-        return author;
+    public Set<Author> getAuthor() {
+        return authors;
     }
 
     public String getSerialNumber() {
@@ -52,12 +68,12 @@ public class Book {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Book book = (Book) o;
-        return id == book.id && yearOfPublieshed == book.yearOfPublieshed && Float.compare(book.price, price) == 0 && Objects.equals(title, book.title) && Objects.equals(author, book.author) && Objects.equals(serialNumber, book.serialNumber);
+        return id == book.id && yearOfPublieshed == book.yearOfPublieshed && Float.compare(book.price, price) == 0 && Objects.equals(title, book.title) && Objects.equals(serialNumber, book.serialNumber) && Objects.equals(authors, book.authors);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, author, serialNumber, yearOfPublieshed, price);
+        return Objects.hash(id, title, serialNumber, yearOfPublieshed, price, authors);
     }
 
     @Override
@@ -65,10 +81,10 @@ public class Book {
         return "Book{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
-                ", author=" + author +
                 ", serialNumber='" + serialNumber + '\'' +
                 ", yearOfPublieshed=" + yearOfPublieshed +
                 ", price=" + price +
+                ", authors=" + authors +
                 '}';
     }
 }
