@@ -2,12 +2,11 @@ package com.librarymanagement.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 public class Author {
@@ -22,6 +21,20 @@ public class Author {
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private Date DOB;
+    @ManyToMany(
+            fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            }
+    )
+    @JoinTable(name = "author_book",
+            inverseJoinColumns = @JoinColumn(name = "book_id", referencedColumnName = "id"),
+            joinColumns = @JoinColumn(name = "author_id", referencedColumnName = "id")
+    )
+    private Set<Book> books = new HashSet<>();
+
+
 
     public Author(){};
     public Author(int id, String fname, String lname, String mname, String country, Date DOB) {
@@ -76,6 +89,18 @@ public class Author {
 
     public Date getDOB() {
         return DOB;
+    }
+
+    public void addBook(Book book){
+        this.books.add(book);
+        System.out.println("authors of this book ::" + book.getAuthors().toString());
+        book.getAuthors().add(this);
+    }
+
+    public void removeBook(Book book){
+        this.books.remove(book);
+        System.out.println("authors of this book ::" + book.getAuthors().toString());
+        book.getAuthors().remove(this);
     }
 
     @Override
