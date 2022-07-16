@@ -67,8 +67,7 @@ public class BookController {
     }
 
     @RequestMapping(value = "/author/{authorId}/book/{bookId}")
-    public ResponseEntity<Object> getABookByAuthorId(@PathVariable("authorId") int authorId, @PathVariable("bookId") int bookId)
-    {
+    public ResponseEntity<Object> getABookByAuthorId(@PathVariable("authorId") int authorId, @PathVariable("bookId") int bookId) {
         if (!authorRepository.existsById(authorId)) {
             return new ResponseEntity<>("Author not found", HttpStatus.NOT_FOUND);
         }
@@ -76,41 +75,19 @@ public class BookController {
     }
 
     @RequestMapping(value = "/author/{authorId}/book/{bookId}", method = RequestMethod.PUT)
-    public ResponseEntity<Object> updateABookByAuthorId(@PathVariable("authorId") int authorId, @PathVariable("bookId") int bookId, @RequestBody Book book)
-    {
+    public ResponseEntity<Object> updateABookByAuthorId(@PathVariable("authorId") int authorId, @PathVariable("bookId") int bookId, @RequestBody Book book) {
         if (!authorRepository.existsById(authorId)) {
             return new ResponseEntity<>("Author not found", HttpStatus.NOT_FOUND);
         }
         return bookService.updateABookByAuthorId(authorId, bookId, book);
     }
 
-
-
-
-
-    // TODO get all Authors by Bookdid
-
-
-//    public ResponseEntity<List<Tutorial>> getAllTutorialsByTagId(@PathVariable(value = "tagId") Long tagId) {
-//        if (!tagRepository.existsById(tagId)) {
-//            throw new ResourceNotFoundException("Not found Tag  with id = " + tagId);
-//        }
-//        List<Tutorial> authors = authorRepository.findTutorialsByTagsId(tagId);
-//        return new ResponseEntity<>(authors, HttpStatus.OK);
-//    }
-
-
-// TODO
-//    @DeleteMapping("/authors/{authorId}/tags/{tagId}")
-//    public ResponseEntity<HttpStatus> deleteTagFromTutorial(@PathVariable(value = "authorId") Long authorId, @PathVariable(value = "tagId") Long tagId) {
-//        Tutorial author = authorRepository.findById(authorId)
-//                .orElseThrow(() -> new ResourceNotFoundException("Not found Tutorial with id = " + authorId));
-//
-//        author.removeTag(tagId);
-//        authorRepository.save(author);
-//
-//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//    }
-
+    @RequestMapping(value = "/author/{authorId}/book/{bookId}", method = RequestMethod.DELETE)
+    public ResponseEntity<Object> deleteABookByAuthorId(@PathVariable("authorId") int authorId, @PathVariable("bookId") int bookId) {
+        if (!authorRepository.existsById(authorId)) {
+            return new ResponseEntity<>("Author not found", HttpStatus.NOT_FOUND);
+        }
+        return bookService.deleteABookByAuthorId(authorId, bookId);
+    }
 
 }
