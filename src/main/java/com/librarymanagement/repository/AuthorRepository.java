@@ -1,9 +1,10 @@
 package com.librarymanagement.repository;
 
-import org.springframework.data.repository.CrudRepository;
 import com.librarymanagement.model.Author;
+import org.springframework.data.repository.CrudRepository;
 
-import java.util.*;
+import java.util.List;
+
 public interface AuthorRepository extends CrudRepository <Author, Integer> {
-
+    List<Author> findAuthorsByBooks(int bookId);
 }

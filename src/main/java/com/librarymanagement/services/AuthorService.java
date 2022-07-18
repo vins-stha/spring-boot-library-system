@@ -59,7 +59,6 @@ public class AuthorService {
             authorRepository.save(old);
 
             return new ResponseEntity<>(old, HttpStatus.OK);
-
         }
 
         return new ResponseEntity<>("Author not found.", HttpStatus.NOT_FOUND);

@@ -1,26 +1,70 @@
 package com.librarymanagement.model;
 
-import java.util.Objects;
-import java.util.ArrayList;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
 
 @Entity
 public class Book {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     private String title;
-    private ArrayList<Author> author;
     private String serialNumber;
-    private int yearOfPublieshed;
+    private int yearOfPublished;
     private float price;
+    @ManyToMany(
+            fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            },
+            mappedBy = "books"
+    )
+    @JsonIgnore
+    private Set<Author> authors = new HashSet<>();
 
-    public Book(int id, String title, ArrayList<Author> author, String serialNumber, int yearOfPublieshed, float price) {
+    public Book() {
+    }
+
+    public Book(int id, String title, String serialNumber, int yearOfPublished, float price) {
         this.id = id;
         this.title = title;
-        this.author = author;
         this.serialNumber = serialNumber;
-        this.yearOfPublieshed = yearOfPublieshed;
+        this.yearOfPublished = yearOfPublished;
         this.price = price;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    public void setYearOfPublished(int yearOfPublished) {
+        this.yearOfPublished = yearOfPublished;
+    }
+
+    public void setPrice(float price) {
+        this.price = price;
+    }
+
+    public void setAuthors(Set<Author> authors) {
+        this.authors = authors;
+    }
+
+    public Set<Author> getAuthors() {
+        return authors;
     }
 
     public int getId() {
@@ -31,16 +75,12 @@ public class Book {
         return title;
     }
 
-    public ArrayList<Author> getAuthor() {
-        return author;
-    }
-
     public String getSerialNumber() {
         return serialNumber;
     }
 
-    public int getYearOfPublieshed() {
-        return yearOfPublieshed;
+    public int getYearOfPublished() {
+        return yearOfPublished;
     }
 
     public float getPrice() {
@@ -52,12 +92,12 @@ public class Book {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Book book = (Book) o;
-        return id == book.id && yearOfPublieshed == book.yearOfPublieshed && Float.compare(book.price, price) == 0 && Objects.equals(title, book.title) && Objects.equals(author, book.author) && Objects.equals(serialNumber, book.serialNumber);
+        return  yearOfPublished == book.yearOfPublished && Float.compare(book.price, price) == 0 && Objects.equals(title, book.title) && Objects.equals(serialNumber, book.serialNumber) && Objects.equals(authors, book.authors);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, author, serialNumber, yearOfPublieshed, price);
+        return Objects.hash(id, title, serialNumber, yearOfPublished, price, authors);
     }
 
     @Override
@@ -65,10 +105,10 @@ public class Book {
         return "Book{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
-                ", author=" + author +
                 ", serialNumber='" + serialNumber + '\'' +
-                ", yearOfPublieshed=" + yearOfPublieshed +
+                ", yearOfPublished=" + yearOfPublished +
                 ", price=" + price +
+                ", authors=" + authors +
                 '}';
     }
 }
