@@ -3,48 +3,51 @@ package com.librarymanagement.controller;
 import com.librarymanagement.model.Author;
 import com.librarymanagement.services.AuthorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 public class AuthorController {
 
     @Autowired
-    private AuthorService authorService;
+    AuthorService authorService;
 
-    @RequestMapping("/")
-    public String index() {
-        System.out.println("Hello from authors");
-        return "Hello from authors";
+    @GetMapping("/authors")
+    public ResponseEntity<List<Author>> getAllAuthors() {
+
+        return  authorService.getAllAuthors();
     }
 
-    @RequestMapping("/authors")
-    public ResponseEntity<Object> getList() {
-        return authorService.getAll();
-    }
+    @GetMapping("/authors/{id}")
+    public ResponseEntity<Object> getAuthorById(@PathVariable("id") int id) {
 
-    @RequestMapping("/author/{id}")
-    public ResponseEntity<Object> getAuthorById(@PathVariable int id) {
         return authorService.getAuthorById(id);
     }
 
-    @RequestMapping(value = "/author/add", method = RequestMethod.POST)
-    public ResponseEntity<Object> addAuthor(@RequestBody Author author) {
-        System.out.println(author.toString());
+    @PostMapping("/authors")
+    public ResponseEntity<Object> createAuthor(@RequestBody Author author) {
+        if (author.getFname().isEmpty() || author.getLname().isEmpty())
+            return new ResponseEntity<>("Required field/s empty", HttpStatus.BAD_REQUEST);
+
         return authorService.addAuthor(author);
     }
 
-    @RequestMapping(value = "/author/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<Object> updateAuthorById(@PathVariable int id, @RequestBody Author author) {
-        System.out.println(author.toString());
+    @PutMapping("/authors/{id}")
+    public ResponseEntity<Object> updateAuthor(@PathVariable("id") int id, Author author) {
+
         return authorService.updateAuthorById(author, id);
     }
 
-    @RequestMapping(value = "/author/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<Object> deleteAuthorById(@PathVariable int id) {
-        return authorService.deleteAuthorById(id);
+
+    @DeleteMapping("/authors/{id}")
+    public ResponseEntity<Object> deleteAuthor(@PathVariable("id") int id) {
+
+        return authorService.deleteAuthor(id);
     }
 
-
 }
+
