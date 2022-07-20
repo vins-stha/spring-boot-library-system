@@ -1,69 +1,49 @@
 package com.librarymanagement.services;
 
-import com.librarymanagement.errorhandlers.NotFoundException;
 import com.librarymanagement.model.Author;
 import com.librarymanagement.repository.AuthorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.ArrayList;
 
 @Service
-public class AuthorService {
+public class AuthorServiceCopy {
     private ArrayList<Author> authors;
 
     @Autowired
     private AuthorRepository authorRepository;
 
-    public AuthorService() {
+    public AuthorServiceCopy() {
         this.authors = new ArrayList<>();
     }
 
-
-    public ResponseEntity<List<Author>> getAllAuthors() {
-        List<Author> authors = new ArrayList<Author>();
-        for(Author author : authorRepository.findAll())
-            authors.add(author);
-
-        if (authors.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
+    public ResponseEntity<Object> getAll() {
+        System.out.println("AUthors=" + authorRepository.findById(6).get());
+//        for (Author author : authorRepository.findAll()) {
+//            System.out.println(author.toString());
+//            authors.add(author);
+//        }
         return new ResponseEntity<>(authors, HttpStatus.OK);
     }
 
+    public ResponseEntity<Object> getAuthorById(int id) {
+        if (!authorRepository.findById(id).isEmpty()) {
+            Author author = authorRepository.findById(id).get();
 
-    public ResponseEntity<Object> getAuthorById(@PathVariable("id") int id) {
-        Author author = authorRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Not found Author with id = " + id));
+            return new ResponseEntity<>(author, HttpStatus.OK);
+        }
 
-        return new ResponseEntity<>(author, HttpStatus.OK);
+        return new ResponseEntity<>("Not found.", HttpStatus.NOT_FOUND);
     }
 
-    public ResponseEntity<Object> addAuthor(@RequestBody Author author) {
+    public ResponseEntity<Object> addAuthor(Author author) {
         if (author.getFname().isEmpty() || author.getLname().isEmpty())
             return new ResponseEntity<>("Required field is empty", HttpStatus.BAD_REQUEST);
         authorRepository.save(author);
         return new ResponseEntity<>(author, HttpStatus.CREATED);
-    }
-
-
-    public ResponseEntity<Object> deleteAuthor(@PathVariable("id") int id) {
-        if (authorRepository.findById(id).isEmpty())
-            return new ResponseEntity<>("Author not found.", HttpStatus.NOT_FOUND);
-        authorRepository.deleteById(id);
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @DeleteMapping("/authors")
-    public ResponseEntity<HttpStatus> deleteAllAuthors() {
-        authorRepository.deleteAll();
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     public ResponseEntity<Object> updateAuthorById(Author author, int id) {
@@ -89,4 +69,12 @@ public class AuthorService {
         return new ResponseEntity<>("Author not found.", HttpStatus.NOT_FOUND);
 
     }
+
+    public ResponseEntity<Object> deleteAuthorById(int id) {
+        if (authorRepository.findById(id).isEmpty())
+            return new ResponseEntity<>("Author not found.", HttpStatus.NOT_FOUND);
+        authorRepository.deleteById(id);
+        return new ResponseEntity<>("Author deleted", HttpStatus.NO_CONTENT);
+    }
+
 }

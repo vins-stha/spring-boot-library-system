@@ -1,5 +1,6 @@
 package com.librarymanagement.services;
 
+import com.librarymanagement.errorhandlers.NotFoundException;
 import com.librarymanagement.model.Author;
 import com.librarymanagement.model.Book;
 import com.librarymanagement.repository.AuthorRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Service
 public class BookService {
@@ -25,32 +27,66 @@ public class BookService {
         this.books = new ArrayList<>();
     }
 
-    public ResponseEntity<Object> getAll() {
-        this.books = new ArrayList<>();
-        for (Book book : bookRepository.findBooksByDistinctTitle()) {
-            this.books.add(book);
-        }
-        return new ResponseEntity<>(this.books, HttpStatus.OK);
-    }
+    public ResponseEntity<Object> getAllBooks() {
+        List<Book> books = new ArrayList<Book>();
 
-    public ResponseEntity<Object> getBookById(int id) {
-        if (!bookRepository.findById(id).isEmpty()) {
-            Book book = bookRepository.findById(id).get();
-
-            return new ResponseEntity<>(book, HttpStatus.OK);
+        bookRepository.findAll().forEach(books::add);
+        int count = 1;
+        for(Book book: bookRepository.findAll()){
+            System.out.println(count + ": "+ book.hashCode());
         }
 
-        return new ResponseEntity<>("Not found.", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
-    public ResponseEntity<Object> addBook(Book book) {
-        if (book.getTitle().isEmpty())
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        bookRepository.save(book);
+    public ResponseEntity<Object> getAllBooksByAuthorId(int authorId) {
+        if (!authorRepository.existsById(authorId)) {
+            throw new NotFoundException("Not found Author with id = " + authorId);
+        }
+
+        List<Book> books = bookRepository.findBooksByAuthorsId(authorId);
+        return new ResponseEntity<>(books, HttpStatus.OK);
+    }
+
+    public ResponseEntity<Object> getBooksById( int id) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Not found Book with id = " + id));
+
         return new ResponseEntity<>(book, HttpStatus.OK);
     }
 
-    public ResponseEntity<Object> updateBookById(Book book, int id) {
+    public ResponseEntity<Object> getAllAuthorsByBookId(int bookId) {
+        if (!bookRepository.existsById(bookId)) {
+            throw new NotFoundException("Not found Book  with id = " + bookId);
+        }
+
+        List<Author> authors = authorRepository.findAuthorsByBooksId(bookId);
+        return new ResponseEntity<>(authors, HttpStatus.OK);
+    }
+
+    public ResponseEntity<Object> addBook(int authorId, Book bookRequest) {
+        Book book = authorRepository.findById(authorId).map(author -> {
+            System.out.println("AUTHRO" + author.getFname() + author.getClass() + "stream" );
+            int bookId = bookRequest.getId();
+
+            // book is existed
+            if (bookId != 0) {
+                Book _book = bookRepository.findById(bookId)
+                        .orElseThrow(() -> new NotFoundException("Not found Book with id = " + bookId));
+                author.addBook(_book);
+                authorRepository.save(author);
+                return _book;
+            }
+
+            // add and create new Book
+            author.addBook(bookRequest);
+            return bookRepository.save(bookRequest);
+        }).orElseThrow(() -> new NotFoundException("Not found Author with id = " + authorId));
+
+        return new ResponseEntity<>(book, HttpStatus.CREATED);
+    }
+
+    public ResponseEntity<Object> updateBook( int id, Book book) {
         if (!bookRepository.findById(id).isEmpty()) {
             Book old = bookRepository.findById(id).get();
 
@@ -66,117 +102,22 @@ public class BookService {
         }
 
         return new ResponseEntity<>("Book not found.", HttpStatus.NOT_FOUND);
-
     }
 
-    public ResponseEntity<Object> deleteBookById(int id) {
-        if (bookRepository.findById(id).isEmpty())
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<HttpStatus> deleteBookFromAuthor( int authorId,int bookId) {
+        Author author = authorRepository.findById(authorId)
+                .orElseThrow(() -> new NotFoundException("Not found Author with id = " + authorId));
+
+        author.removeBook(bookId);
+        authorRepository.save(author);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    public ResponseEntity<HttpStatus> deleteBook(int id) {
         bookRepository.deleteById(id);
-        return new ResponseEntity<>("Book deleted", HttpStatus.NO_CONTENT);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-    public ResponseEntity<Object> getAllBooksByAuthorId(int authorId) {
-        if (authorRepository.findById(authorId).isEmpty()) {
-
-            return new ResponseEntity<>("Author not found", HttpStatus.NOT_FOUND);
-        }
-        List<Book> bookList = bookRepository.findBooksByAuthorsId(authorId);
-
-        return new ResponseEntity<>(bookList, HttpStatus.OK);
-    }
-
-    public ResponseEntity<Object> getABookByAuthorId(int authorId, int bookId) {
-        List<Book> bookList = bookRepository.findBooksByAuthorsId(authorId);
-        Book bookToReturn = bookList.stream().filter(book ->book.getId()==bookId).findFirst().orElse(null);
-        if(bookToReturn == null)
-            return new ResponseEntity<>("No such book", HttpStatus.NOT_FOUND);
-
-        return new ResponseEntity<>(bookToReturn, HttpStatus.OK);
-    }
-
-    public ResponseEntity<Object> addBookByAuthorId(int authorId, Book book) {
-
-        Author author = authorRepository.findById(authorId).get();
-        final boolean[] inList = {false};
-        final boolean[] newBook = {true};
-
-        // save book if not present in book table
-        bookRepository.findAll().forEach(book1 -> {
-            if (book1.getTitle().equals(book.getTitle())
-                    && book1.getYearOfPublished() == book.getYearOfPublished()
-                    && book1.getSerialNumber() == book.getSerialNumber()) {
-                System.out.println("Not new book");
-                newBook[0] = false;
-            }
-        });
-
-        // add to book database if not present
-        if (!newBook[0]) {
-            System.out.println("Not New book");
-            System.out.println("Book already exist" + HttpStatus.CREATED);
-        } else {
-            bookRepository.save(book);
-        }
-
-        // check if book exist in author books list
-        bookRepository.findBooksByAuthorsId(authorId).forEach(book1 -> {
-            boolean exist = book1.getTitle().equals(book.getTitle())
-                    && book1.getYearOfPublished() == book.getYearOfPublished()
-                    && book1.getSerialNumber() == book.getSerialNumber();
-            if (exist) {
-                // do nothing
-                inList[0] = true;
-                System.out.println("Book already present in author book list");
-
-            }
-        });
-
-        if (inList[0])
-            return new ResponseEntity<>("Book exist in author book list", HttpStatus.OK);
-
-        if (!inList[0]) {
-
-            System.out.println("Not in list");
-            author.addBook(book);
-            authorRepository.save(author);
-        }
-
-        return new ResponseEntity<>(HttpStatus.CREATED);
-
-    }
-
-    public ResponseEntity<Object> updateABookByAuthorId(int authorId, int bookId, Book book) {
-        ResponseEntity<Object> response = getABookByAuthorId(authorId, bookId);
-
-        if (Integer.valueOf(response.getStatusCodeValue()).equals(404))
-            return new ResponseEntity<>("Book does not exist", HttpStatus.NOT_FOUND);
-
-        Book bookToUpdate = (Book) response.getBody();
-        if (book.getTitle() != null)
-            bookToUpdate.setTitle(book.getTitle());
-        if (book.getSerialNumber() != null)
-            bookToUpdate.setSerialNumber(book.getSerialNumber());
-        if (!Float.toString(book.getPrice()).isEmpty())
-            bookToUpdate.setPrice(book.getPrice());
-        if (!Integer.toString(book.getYearOfPublished()).isEmpty())
-            bookToUpdate.setYearOfPublished(book.getYearOfPublished());
-
-        bookRepository.save(bookToUpdate);
-        return new ResponseEntity<>(bookToUpdate, HttpStatus.OK);
-    }
-
-    public ResponseEntity<Object> deleteABookByAuthorId(int authorId, int bookId) {
-        ResponseEntity<Object> response = getABookByAuthorId(authorId, bookId);
-
-        if (Integer.valueOf(response.getStatusCodeValue()).equals(404))
-            return new ResponseEntity<>("Book does not exist", HttpStatus.NOT_FOUND);
-
-        bookRepository.deleteById(bookId);
-
-        return new ResponseEntity<>("Book deleted", HttpStatus.OK);
-    }
-
-
 
 }
