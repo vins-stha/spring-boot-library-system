@@ -1,6 +1,8 @@
 package com.librarymanagement.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.librarymanagement.stockmanagement.Stock;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
@@ -19,23 +21,28 @@ public class Book {
     private String serialNumber;
     private int yearOfPublished;
     private float price;
-    @ManyToMany(
-            fetch = FetchType.LAZY,
-//            cascade = {
-//                    CascadeType.PERSIST,
-//                    CascadeType.MERGE
-//            },
+    @ManyToMany(fetch = FetchType.LAZY,
+            // cascade = {
+            // CascadeType.PERSIST,
+            // CascadeType.MERGE
+            // },
             mappedBy = "books")
+    // @OneToOne(mappedBy = "book_id", cascade = CascadeType.ALL, fetch =
+    // FetchType.LAZY)
+    // private Stock inStock;
+
     @JsonIgnore
     private Set<Author> authors = new HashSet<>();
 
     public Book() {
 
     }
+
     public Book(String title) {
-        this.title=title;
+        this.title = title;
 
     }
+
     public Book(String title, String serialNumber, int yearOfPublished, float price) {
         this.title = title;
         this.serialNumber = serialNumber;
@@ -89,8 +96,10 @@ public class Book {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Book book = (Book) o;
         return Objects.equals(title, book.title) && Objects.equals(authors, book.authors);
     }
