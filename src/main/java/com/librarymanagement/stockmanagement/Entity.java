@@ -1,4 +1,5 @@
 package com.librarymanagement.stockmanagement;
 
-public class StockService {
+public @interface Entity {
+
 }
