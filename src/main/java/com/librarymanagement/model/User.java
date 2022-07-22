@@ -1,7 +1,8 @@
 package com.librarymanagement.model;
 
-import javax.persistence.*;
+import java.util.ArrayList;
 
+import javax.persistence.*;
 
 @Entity
 public class User {
@@ -13,6 +14,13 @@ public class User {
     private String email;
     private String password;
     private String role;
+    private int borrowedItemsCount; // default 0
+
+    // 1 to many
+    private ArrayList<BorrowedItem> borrowedItems;
+
+    public User() {
+    }
 
     public User(Integer id, String fname, String lname, String email, String password, String role) {
         this.id = id;
@@ -21,6 +29,7 @@ public class User {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.borrowedItems = new ArrayList<>();
     }
 
     public Integer getId() {

@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.librarymanagement.errorhandlers.NotFoundException;
 import com.librarymanagement.repository.BookRepository;
+import org.springframework.stereotype.Service;
 
+@Service
 public class StockService {
     private ArrayList<Stock> stockList = new ArrayList<>();
 
@@ -20,6 +22,9 @@ public class StockService {
 
     @Autowired
     private BookRepository bookRepository;
+
+    public StockService() {
+    }
 
     public ResponseEntity<Object> getBooksStock() {
         for (Stock stock : stockRepository.findAll()) {
@@ -63,6 +68,26 @@ public class StockService {
         stockRepository.save(_stock);
         return new ResponseEntity<>(_stock, HttpStatus.OK);
     }
+
+    public void loanABookAndUpdateStock(@RequestBody int bookId) {
+        Stock _stock;
+
+        if (stockRepository.findByBookId(bookId) != null) {
+            _stock = stockRepository.findByBookId(bookId);
+            int present_count = stockRepository.findByBookId(bookId).getCount() - 1;
+
+            if (present_count < 0) {
+                present_count = 0;
+            }
+
+            _stock.setCount(present_count);
+
+        } else {
+            throw new NotFoundException("Book not present in stock");
+        }
+
+    }
+
 
     public ResponseEntity<Object> deleteEntryByBookId(@PathVariable int bookId) {
         if (stockRepository.findByBookId(bookId) != null) {
