@@ -88,6 +88,7 @@ public class StockService {
 
     }
 
+
     public ResponseEntity<Object> deleteEntryByBookId(@PathVariable int bookId) {
         if (stockRepository.findByBookId(bookId) != null) {
             try {
