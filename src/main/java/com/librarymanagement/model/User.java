@@ -9,11 +9,17 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
+
+    // @NotBlank(message = "Name is mandatory")
     private String fname;
     private String lname;
+
+    @Column(unique = true)
     private String email;
+
     private String password;
     private String role;
+
     private int borrowedItemsCount; // default 0
 
     // 1 to many
@@ -70,6 +76,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getRole() {
+        return this.role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     @Override
