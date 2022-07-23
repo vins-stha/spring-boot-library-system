@@ -3,18 +3,30 @@ package com.librarymanagement.model;
 import java.util.ArrayList;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Entity
+@Table(uniqueConstraints = { // other constraints
+        @UniqueConstraint(name = "uniqueEmail", columnNames = { "email" }),
+})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    // @NotBlank(message = "Name is mandatory")
+    @NotBlank(message = "Name can't be empty")
+    @Size(min = 3, message = "Name must be at least 3 characters long!")
+
     private String fname;
+
+    @NotBlank(message = "Last Name can't be empty")
     private String lname;
 
-    @Column(unique = true)
+    @NotBlank(message = "Email can't be empty")
+    @Email(message = "Please enter a valid e-mail address")
     private String email;
 
     private String password;

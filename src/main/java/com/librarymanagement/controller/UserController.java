@@ -1,17 +1,28 @@
 package com.librarymanagement.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.validation.Valid;
+import javax.xml.transform.Result;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.librarymanagement.errorhandlers.NotFoundException;
 import com.librarymanagement.model.User;
+import com.librarymanagement.errorhandlers.ErrorResponseBody;
+
 import com.librarymanagement.repository.UserRepository;
+// import com.mysql.cj.xdevapi.Result;
 
 @RestController
 @RequestMapping("/api")
@@ -42,19 +53,32 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<Object> addUser(@RequestBody User user) {
-        if (user.getFname() != null
-                && user.getEmail() != null) {
-            if (user.getEmail().equals(ADMIN))
-                user.setRole("admin");
-            else
-                user.setRole("user");
-            User _user = userRepository.save(user);
-            return new ResponseEntity<>(_user, HttpStatus.OK);
+    public ResponseEntity<Object> addUser(@Valid @RequestBody User user, Errors errors) {
+        ErrorResponseBody result = new ErrorResponseBody();
+        if (!isEmailRegistered(user.getEmail())) {
 
-        } else
+            if (!errors.hasErrors()) {
+                if (user.getEmail().equals(ADMIN))
+                    user.setRole("admin");
+                else
+                    user.setRole("user");
+                User _user = userRepository.save(user);
+                return new ResponseEntity<>(_user, HttpStatus.OK);
 
-            return new ResponseEntity<>("Validation Error", HttpStatus.OK);
+            } else {
+
+                result.setMesg(errors.getAllErrors()
+                        .stream()
+                        .map(err -> err.getDefaultMessage())
+                        .collect(Collectors.joining(","))
+
+                );
+
+                return ResponseEntity.badRequest().body(result);
+            }
+        }
+        result.setMesg("Email already registred.");
+        return ResponseEntity.badRequest().body(result);
     }
 
     @PutMapping("/users/{userId}")
@@ -91,5 +115,15 @@ public class UserController {
     }
 
     // public void setUserRole()
+
+    // is email registered
+    public boolean isEmailRegistered(String email) {
+        if (userRepository.findAll().stream()
+                .filter(user -> user.getEmail().equals(email))
+                .toArray().length == 1)
+            return true;
+        else
+            return false;
+    }
 
 }
