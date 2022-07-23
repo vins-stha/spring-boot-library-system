@@ -114,8 +114,6 @@ public class UserController {
         return new ResponseEntity<>("User deleted", HttpStatus.OK);
     }
 
-    // public void setUserRole()
-
     // is email registered
     public boolean isEmailRegistered(String email) {
         if (userRepository.findAll().stream()
