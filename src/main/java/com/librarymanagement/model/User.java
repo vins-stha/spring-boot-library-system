@@ -3,7 +3,6 @@ package com.librarymanagement.model;
 import java.util.ArrayList;
 
 import javax.persistence.*;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;

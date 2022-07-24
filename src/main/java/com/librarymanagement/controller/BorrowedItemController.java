@@ -1,17 +1,6 @@
 package com.librarymanagement.controller;
 
-import java.util.ArrayList;
-import java.util.Date;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.librarymanagement.errorhandlers.NotFoundException;
 import com.librarymanagement.model.Book;
 import com.librarymanagement.model.BorrowedItem;
@@ -21,8 +10,18 @@ import com.librarymanagement.repository.BorrowedItemRepository;
 import com.librarymanagement.repository.UserRepository;
 import com.librarymanagement.requests.BorrowRequests;
 import com.librarymanagement.stockmanagement.StockService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.Date;
+
+;
 
 @RestController
+@RequestMapping("/api")
 public class BorrowedItemController {
     private ArrayList<BorrowedItem> borrowedItems = new ArrayList<>();
 
@@ -51,32 +50,59 @@ public class BorrowedItemController {
     public ResponseEntity<Object> getAllItems() {
 
         ArrayList<BorrowedItem> _borrowedItems = new ArrayList<>();
-        borrowedItemRepository.findAll().forEach(_borrowedItems::add);
+        for (BorrowedItem item : borrowedItemRepository.findAll()) {
+            _borrowedItems.add(item);
+        }
+        // borrowedItemRepository.findAll().forEach(_borrowedItems::add);
+        System.out.println("\n\nBOoorow=\n" + _borrowedItems);
 
         return new ResponseEntity<>(_borrowedItems, HttpStatus.OK);
     }
 
+    // handle borrow (book) request from user
     @PostMapping("/users/{userId}/borrow")
     public ResponseEntity<Object> borrowItem(@PathVariable int userId, @RequestBody BorrowRequests request) {
+        System.out.println("HELLLO HERER AND HERE...");
 
         String message = "";
+        ObjectMapper mapper = new ObjectMapper();
+        int bookId = request.getBookId();
+        BorrowedItem _item;
+
         // check user id
-        UserRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
+        UserRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found with id" + userId));
 
         // check book id
-        bookRepository.findById(request.getBookId()).orElseThrow(() -> new NotFoundException("Book not found"));
+        try {
+            Book _bookToBorrow = bookRepository.findById(bookId).get();
+            User _borrower = UserRepository.findById(userId).get();
 
-        Book _bookToBorrow = bookRepository.findById(request.getBookId()).get();
-        User _borrower = UserRepository.findById(userId).get();
+            // check if book is in stock
+            ResponseEntity<Object> obj = stockService.getBookCount(bookId);
 
-        // check if item exist in their list
-        ArrayList<BorrowedItem> itemsBorrowed = borrowedItemRepository.getAllItemsBorrowedByUser(userId);
-        BorrowedItem _item;
-        for (BorrowedItem item : itemsBorrowed) {
-            // if book exist
-            if (item.getBook().getId() == request.getBookId()) {
-                message = "Book/Item already exist in borrowed item list";
+            // if book is not present in stock
+            if (Integer.parseInt(obj.getBody().toString()) < 1 || obj.getBody() == null) {
+                return ResponseEntity.badRequest().body("Book is out of stock");
+
             } else {
+                ArrayList<BorrowedItem> itemsBorrowed = borrowedItemRepository.getAllItemsBorrowedByUser(userId);
+
+                // if items are present in user borrowed list
+                if ((itemsBorrowed).size() > 0) {
+
+                    // itemsBorrowed
+                    for (BorrowedItem item : itemsBorrowed) {
+
+                        // if book exist
+                        if (item.getBook().getId() == request.getBookId()) {
+                            message = "Book/Item already exist in borrowed item list of user";
+                            return ResponseEntity.badRequest().body(message);
+                        }
+                    }
+                }
+
+                // if null or book is not in list
+
                 Date today = new Date();
                 long dueDay = today.getTime() + (14 * 24 * 60 * 60 * 1000);
                 Date dueDate = new Date(dueDay);
@@ -93,12 +119,15 @@ public class BorrowedItemController {
                 // Reduce its count in stock by 1
                 stockService.loanABookAndUpdateStock(_bookToBorrow.getId());
                 message = _item.toString();
-
             }
+            return new ResponseEntity<>(message, HttpStatus.OK);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Book not in stock. " + e.getMessage());
         }
 
-        return new ResponseEntity<>(message, HttpStatus.OK);
     }
+
 
     // @PostMapping("/users/{userId}/borrow")
     // V2.0 wehn UI is present
