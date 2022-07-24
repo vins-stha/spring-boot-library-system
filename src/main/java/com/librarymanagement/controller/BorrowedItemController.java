@@ -62,8 +62,6 @@ public class BorrowedItemController {
     // handle borrow (book) request from user
     @PostMapping("/users/{userId}/borrow")
     public ResponseEntity<Object> borrowItem(@PathVariable int userId, @RequestBody BorrowRequests request) {
-        System.out.println("HELLLO HERER AND HERE...");
-
         String message = "";
         ObjectMapper mapper = new ObjectMapper();
         int bookId = request.getBookId();
@@ -126,6 +124,51 @@ public class BorrowedItemController {
             return ResponseEntity.badRequest().body("Book not in stock. " + e.getMessage());
         }
 
+    }
+
+    // handle return book request
+    @PostMapping("/users/{userId}/return/books/{bookId}")
+    public ResponseEntity<Object>returnItem(@PathVariable int userId, @PathVariable int bookId){
+        String message="";
+        try{
+            User _returnee = UserRepository.findById(userId).get();
+            try {
+                Book _bookToReturn = bookRepository.findById(bookId).get();
+                try {
+                    ArrayList<BorrowedItem> _borrowedItemsByUser = borrowedItemRepository.getAllItemsBorrowedByUser(userId);
+                        if(_borrowedItemsByUser.size() > 0)    {
+                            // itemsBorrowed
+                            for (BorrowedItem item : _borrowedItemsByUser) {
+
+                                // if book exist
+                                if (item.getBook().getId() == bookId) {
+                                   // check for over due
+                                    // update stock
+                                    // update loaned count
+                                    // save stock
+
+                                }
+                                else
+                                {
+                                    return ResponseEntity.badRequest().body("Book not present in borrower list" +bookId);
+                                }
+                            }
+                        }
+
+                }catch(Exception e){ // to be deleted try catch
+                    return ResponseEntity.badRequest().body("Book not present in borrower list" +bookId);
+                }
+
+
+
+            }catch(Exception e){
+                return ResponseEntity.badRequest().body("Book not found for given id " +bookId);
+
+            }
+        }catch(Exception e){
+            return ResponseEntity.badRequest().body("User not found with id " + userId + ". " + e.getMessage());
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 
