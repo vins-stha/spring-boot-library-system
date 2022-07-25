@@ -8,14 +8,7 @@ import java.util.Date;
 public class BorrowedItem {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
-    private Date startState; // default now
-    private Date dueDate; // default now + 14 days
-    private long overDueDays; // default 0
-    private double fineAmount; // dfault 0
-    private boolean finePaid=true;
-    // private int itemCount;
-
+    private int id;
     @OneToOne
     @JoinColumn(name = "book_id", referencedColumnName = "id")
     private Book book;
@@ -23,16 +16,24 @@ public class BorrowedItem {
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
+    private Date startState; // default now
+    private Date dueDate; // default now + 14 days
+    private long overDueDays; // default 0
+    private double fineAmount; // dfault 0
+    private boolean finePaidStatus=true;
+    // private int itemCount;
+
+
 
     public BorrowedItem() {
     }
 
-    public boolean isFinePaid() {
-        return finePaid;
+    public boolean getfinePaidStatus() {
+        return finePaidStatus;
     }
 
-    public void setFinePaid(boolean finePaid) {
-        this.finePaid = finePaid;
+    public void setFinePaidStatus(boolean finePaid) {
+        this.finePaidStatus = finePaid;
     }
 
     public long getOverDueDays() {
@@ -51,11 +52,11 @@ public class BorrowedItem {
         this.fineAmount = fineAmount;
     }
 
-    public long getId() {
+    public int getId() {
         return this.id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
