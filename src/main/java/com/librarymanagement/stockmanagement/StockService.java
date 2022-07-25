@@ -89,6 +89,22 @@ public class StockService {
 
     }
 
+    public void handleReturn(@RequestBody int bookId) {
+        Stock _stock;
+
+        if (stockRepository.findByBookId(bookId) != null) {
+            _stock = stockRepository.findByBookId(bookId);
+
+            _stock.setCount(_stock.getCount() + 1 );
+            _stock.setBorrowed_count(_stock.getBorrowed_count() - 1);
+            stockRepository.save(_stock);
+
+        } else {
+            throw new NotFoundException("Book not present in stock");
+        }
+
+    }
+
     public ResponseEntity<Object> deleteEntryByBookId(@PathVariable int bookId) {
         if (stockRepository.findByBookId(bookId) != null) {
             try {
