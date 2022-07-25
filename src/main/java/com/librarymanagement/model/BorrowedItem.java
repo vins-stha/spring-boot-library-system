@@ -1,13 +1,7 @@
 package com.librarymanagement.model;
 
+import javax.persistence.*;
 import java.util.Date;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
 
 @Entity
 @Table(name = "borrowed_item")
@@ -17,8 +11,9 @@ public class BorrowedItem {
     private long id;
     private Date startState; // default now
     private Date dueDate; // default now + 14 days
-    private int overDueDays; // default 0
+    private long overDueDays; // default 0
     private double fineAmount; // dfault 0
+    private boolean finePaid=true;
     // private int itemCount;
 
     @OneToOne
@@ -30,6 +25,30 @@ public class BorrowedItem {
     private User user;
 
     public BorrowedItem() {
+    }
+
+    public boolean isFinePaid() {
+        return finePaid;
+    }
+
+    public void setFinePaid(boolean finePaid) {
+        this.finePaid = finePaid;
+    }
+
+    public long getOverDueDays() {
+        return overDueDays;
+    }
+
+    public void setOverDueDays(long overDueDays) {
+        this.overDueDays = overDueDays;
+    }
+
+    public double getFineAmount() {
+        return fineAmount;
+    }
+
+    public void setFineAmount(double fineAmount) {
+        this.fineAmount = fineAmount;
     }
 
     public long getId() {
