@@ -1,12 +1,9 @@
 package com.librarymanagement.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.librarymanagement.stockmanagement.Stock;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "books")
@@ -21,11 +18,11 @@ public class Book {
     private String serialNumber;
     private int yearOfPublished;
     private float price;
+    private String language = "EN";
+    @ElementCollection(fetch = FetchType.LAZY)
+    private Set<String> genres = new HashSet<>();
+
     @ManyToMany(fetch = FetchType.LAZY,
-            // cascade = {
-            // CascadeType.PERSIST,
-            // CascadeType.MERGE
-            // },
             mappedBy = "books")
     // @OneToOne(mappedBy = "book_id", cascade = CascadeType.ALL, fetch =
     // FetchType.LAZY)
@@ -43,11 +40,29 @@ public class Book {
 
     }
 
-    public Book(String title, String serialNumber, int yearOfPublished, float price) {
+//    public Book(String title, String serialNumber, int yearOfPublished, float price) {
+//        this.title = title;
+//        this.serialNumber = serialNumber;
+//        this.yearOfPublished = yearOfPublished;
+//        this.price = price;
+//    }
+
+
+    public Book(String title, String serialNumber, int yearOfPublished, float price, String language, Set<String> genres) {
         this.title = title;
         this.serialNumber = serialNumber;
         this.yearOfPublished = yearOfPublished;
         this.price = price;
+        this.language = language;
+        this.genres = genres;
+    }
+
+    public Set<String> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(Set<String> genres) {
+        this.genres = genres;
     }
 
     public int getId() {
@@ -94,6 +109,14 @@ public class Book {
         this.price = price;
     }
 
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -115,6 +138,7 @@ public class Book {
                 "id=" + id +
                 ", title='" + title + '\'' +
                 ", authors=" + authors +
+                ", genres=" + genres +
                 '}';
     }
 }

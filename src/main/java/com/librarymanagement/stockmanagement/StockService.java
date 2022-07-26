@@ -1,17 +1,15 @@
 package com.librarymanagement.stockmanagement;
 
+import com.librarymanagement.errorhandlers.NotFoundException;
+import com.librarymanagement.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.ArrayList;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.librarymanagement.errorhandlers.NotFoundException;
-import com.librarymanagement.repository.BookRepository;
-import org.springframework.stereotype.Service;
+import java.util.ArrayList;
 
 @Service
 public class StockService {
@@ -31,10 +29,11 @@ public class StockService {
             stockList.add(stock);
 
         }
-        return new ResponseEntity<>(stockList, HttpStatus.OK);
+        return new ResponseEntity<>(stockRepository.findAll(), HttpStatus.OK);
     }
 
     public ResponseEntity<Object> getBookCount(@PathVariable int bookId) {
+        System.out.println("BOOKID===" + bookId);
         int book_count = 0;
         if (stockRepository.findByBookId(bookId) != null) {
 
@@ -81,6 +80,8 @@ public class StockService {
             }
 
             _stock.setCount(present_count);
+            _stock.setBorrowed_count(_stock.getBorrowed_count() + 1);
+            stockRepository.save(_stock);
 
         } else {
             throw new NotFoundException("Book not present in stock");
@@ -88,6 +89,21 @@ public class StockService {
 
     }
 
+    public void handleReturn(@RequestBody int bookId) {
+        Stock _stock;
+
+        if (stockRepository.findByBookId(bookId) != null) {
+            _stock = stockRepository.findByBookId(bookId);
+
+            _stock.setCount(_stock.getCount() + 1 );
+            _stock.setBorrowed_count(_stock.getBorrowed_count() - 1);
+            stockRepository.save(_stock);
+
+        } else {
+            throw new NotFoundException("Book not present in stock");
+        }
+
+    }
 
     public ResponseEntity<Object> deleteEntryByBookId(@PathVariable int bookId) {
         if (stockRepository.findByBookId(bookId) != null) {
