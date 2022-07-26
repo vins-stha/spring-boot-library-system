@@ -90,11 +90,29 @@ public class BookService {
         if (!bookRepository.findById(id).isEmpty()) {
             Book old = bookRepository.findById(id).get();
 
-            old.setPrice(book.getPrice());
-            old.setSerialNumber(book.getSerialNumber());
-            old.setTitle(book.getTitle());
-            old.setYearOfPublished(book.getYearOfPublished());
-            old.setAuthors(book.getAuthors());
+            if(book.getTitle() != null)
+                old.setTitle(book.getTitle());
+
+            if(book.getLanguage()!= null)
+                old.setLanguage(book.getLanguage());
+
+            if(book.getSerialNumber()!= null)
+                old.setSerialNumber(book.getSerialNumber());
+
+            if(!String.valueOf(book.getPrice()).equals(""))
+                old.setPrice(book.getPrice());
+
+            if(!String.valueOf(book.getYearOfPublished()).equals(""))
+                old.setYearOfPublished(book.getYearOfPublished());
+
+            if(!book.getGenres().isEmpty())
+            {
+                for(String genre: book.getGenres())
+                {
+                    if(!old.getGenres().contains(genre))
+                        old.getGenres().add(genre);
+                }
+            }
 
             bookRepository.save(old);
 
