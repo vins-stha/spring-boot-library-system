@@ -42,7 +42,6 @@ public class BookController {
     @PostMapping("/authors/{authorId}/books")
     public ResponseEntity<Object> addBook(@PathVariable(value = "authorId") int authorId, @RequestBody Book book) {
 
-
         return bookService.addBook(authorId, book);
     }
 
