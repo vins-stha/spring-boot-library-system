@@ -66,10 +66,10 @@ public class BookService {
 
     public ResponseEntity<Object> addBook(int authorId, Book bookRequest) {
         Book book = authorRepository.findById(authorId).map(author -> {
-            System.out.println("AUTHRO" + author.getFname() + author.getClass() + "stream" );
+            // System.out.println("AUTHRO" + author.getFname() + author.getClass() + "stream" );
             int bookId = bookRequest.getId();
 
-            // book is existed
+            // book exists
             if (bookId != 0) {
                 Book _book = bookRepository.findById(bookId)
                         .orElseThrow(() -> new NotFoundException("Not found Book with id = " + bookId));
