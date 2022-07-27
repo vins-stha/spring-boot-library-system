@@ -1,4 +1,4 @@
-FROM openjdk:8
+FROM adoptopenjdk/openjdk11:alpine-jre
 WORKDIR .
 EXPOSE 8085
 ADD target/spring-boot-library-management-api.jar spring-boot-library-management-api.jar
