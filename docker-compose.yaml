@@ -1,0 +1,26 @@
+version: '3'
+services:
+  spring_boot_api:
+    build: .
+    ports:
+      - "8083:8083"
+    depends_on:
+      - spring_boot_api_mysql
+    environment:
+      - spring.datasource.url=jdbc:mysql://spring_boot_api_mysql:3306/springboot?useSSL=false
+      - spring.datasource.username=root
+      - spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+  spring_boot_api_mysql:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: springboot
+      MYSQL_ROOT_PASSWORD:
+      MYSQL_ROOT_USERNAME: root
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    ports:
+      - "3308:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+
