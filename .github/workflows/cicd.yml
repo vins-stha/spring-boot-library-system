@@ -36,8 +36,8 @@ jobs:
           docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
       - name: push
         run: |
-        docker push ${{secrets.DOCKERHUB_USERNAME}}/spring_boot_api_mysql
-        docker push ${{secrets.DOCKERHUB_USERNAME}}/spring_boot_api_1
+          docker push ${{secrets.DOCKERHUB_USERNAME}}/spring_boot_api_mysql
+          docker push ${{secrets.DOCKERHUB_USERNAME}}/spring_boot_api_1
 
 
 #        run: mvn -B package --file pom.xml
