@@ -31,8 +31,8 @@ jobs:
       - name: create docker image
         run: docker-compose up -d
 
-      - name: docker login and push
       - uses: actions/checkout@v1
+      - name: docker login and push
         run: | 
           docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD --password-stdin
       - name: push
