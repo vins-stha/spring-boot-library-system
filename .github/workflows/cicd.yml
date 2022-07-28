@@ -24,8 +24,9 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn clean package
+
       - name: create docker image
-        run: docker-compose up
+        run: docker-compose up -d
 
 #        run: mvn -B package --file pom.xml
       - uses: mr-smithers-excellent/docker-build-push@v5
