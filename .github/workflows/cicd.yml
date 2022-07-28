@@ -24,6 +24,9 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn clean package
+      - name: create docker image
+        run: docker-compose up
+
 #        run: mvn -B package --file pom.xml
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: Build and push docker image
@@ -31,7 +34,7 @@ jobs:
           image: vinsstha/springboot-library-management-api
           tags: v1
           registry: docker.io
-          dockerfile: Dockerfile
+          dockerfile: "docker-compose.yaml"
           username: ${{secrets.DOCKERHUB_USERNAME}}
           password: ${{secrets.DOCKERHUB_PASSWORD}}
 
