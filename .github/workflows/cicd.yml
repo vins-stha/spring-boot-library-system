@@ -32,8 +32,9 @@ jobs:
         run: docker-compose up -d
 
       - name: docker login and push
+      - uses: actions/checkout@v1
         run: | 
-          docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD --password-stdin spetestregistry.docker.io
+          docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD --password-stdin
       - name: push
         run: |
           docker push ${{secrets.DOCKERHUB_USERNAME}}/spring_boot_api_mysql
